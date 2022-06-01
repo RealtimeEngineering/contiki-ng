@@ -3,7 +3,7 @@ TOOLSDIR=../../tools
 
 EXAMPLES = \
 6tisch/6p-packet/zoul \
-6tisch/simple-node/cc2538dk:MAKE_WITH_SECURITY=1,MAKE_WITH_ORCHESTRA=1 \
+6tisch/simple-node/cc2538dk:MAKE_WITH_SECURITY=1:MAKE_WITH_ORCHESTRA=1 \
 6tisch/simple-node/simplelink:DEFINES=TSCH_CONF_AUTOSELECT_TIME_SOURCE=1 \
 6tisch/simple-node/nrf:BOARD=nrf52840/dk \
 6tisch/simple-node/nrf:BOARD=nrf52840/dongle \
@@ -55,6 +55,7 @@ libs/shell/openmote \
 libs/simple-energest/openmote \
 libs/timers/zoul \
 libs/trickle-library/zoul \
+libs/unit-tests/zoul \
 lwm2m-ipso-objects/zoul:DEFINES=LWM2M_Q_MODE_CONF_ENABLED=1,LWM2M_Q_MODE_CONF_INCLUDE_DYNAMIC_ADAPTATION=1\
 lwm2m-ipso-objects/zoul:MAKE_WITH_DTLS=1 \
 mqtt-client/simplelink:BOARD=sensortag/cc2650:DEFINES=BOARD_CONF_SENSORS_DISABLE=1,TI_SPI_CONF_ENABLE=0 \
