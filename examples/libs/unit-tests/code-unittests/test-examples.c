@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Simon Berg
+ * Copyright (c) 2020, Kamil Mańkowski
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,34 +29,64 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /*---------------------------------------------------------------------------*/
-#ifndef STRFORMAT_H_
-#define STRFORMAT_H_
-/*---------------------------------------------------------------------------*/
 #include "contiki.h"
+#include "services/unit-test/unit-test.h"
 
-#include <stdarg.h>
+#include <stdio.h>
 /*---------------------------------------------------------------------------*/
-#define STRFORMAT_OK 0
-#define STRFORMAT_FAILED 1
+PROCESS(run_tests, "Unit tests process");
+AUTOSTART_PROCESSES(&run_tests);
 /*---------------------------------------------------------------------------*/
-typedef unsigned int strformat_result;
+void
+print_test_report(const unit_test_t *utp)
+{
+  printf("[=check-me=] %s... ", utp->descr);
+  if(utp->passed == false) {
+    printf("FAILED at line %u\n", utp->exit_line);
+  } else {
+    printf("SUCCEEDED\n");
+  }
+}
 /*---------------------------------------------------------------------------*/
-/* The data argument may only be considered valid during the function call */
-typedef strformat_result (*strformat_write)(void *user_data,
-                                            const char *data,
-                                            unsigned int len);
+/* Demonstrates a test that succeeds. The exit point will be
+   the line where UNIT_TEST_END is called. */
+UNIT_TEST_REGISTER(test_example, "Example unit test");
+UNIT_TEST(test_example)
+{
+  uint32_t value = 1;
 
-typedef struct strformat_context_s {
-  strformat_write write_str;
-  void *user_data;
-} strformat_context_t;
-/*---------------------------------------------------------------------------*/
-int format_str(const strformat_context_t *ctxt, const char *format, ...)
-     __attribute__ ((__format__ (__printf__, 2,3)));
+  UNIT_TEST_BEGIN();
 
-int
-format_str_v(const strformat_context_t *ctxt, const char *format, va_list ap)
-     __attribute__ ((__format__ (__printf__, 2, 0)));
+  UNIT_TEST_ASSERT(value == 1);
+
+  UNIT_TEST_END();
+}
 /*---------------------------------------------------------------------------*/
-#endif /* STRFORMAT_H_ */
+/* Demonstrates a test that fails. The exit point will be
+   the line where the call to UNIT_TEST_ASSERT fails. */
+UNIT_TEST_REGISTER(test_example_failed, "Example failing unit test");
+UNIT_TEST(test_example_failed)
+{
+  uint32_t value = 1;
+
+  UNIT_TEST_BEGIN();
+
+  UNIT_TEST_ASSERT(value == 0);
+
+  UNIT_TEST_END();
+}
+/*---------------------------------------------------------------------------*/
+PROCESS_THREAD(run_tests, ev, data)
+{
+  PROCESS_BEGIN();
+
+  printf("\n\t RUN UNIT TESTS \n\n");
+
+  UNIT_TEST_RUN(test_example);
+  UNIT_TEST_RUN(test_example_failed);
+
+  printf("[=check-me=] DONE\n");
+
+  PROCESS_END();
+}
 /*---------------------------------------------------------------------------*/
