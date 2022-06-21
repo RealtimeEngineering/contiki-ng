@@ -2,7 +2,6 @@
 <simconf>
   <project EXPORT="discard">[APPS_DIR]/mrm</project>
   <project EXPORT="discard">[APPS_DIR]/mspsim</project>
-  <project EXPORT="discard">[APPS_DIR]/avrora</project>
   <project EXPORT="discard">[APPS_DIR]/serial_socket</project>
   <project EXPORT="discard">[APPS_DIR]/powertracker</project>
   <simulation>
@@ -24,7 +23,8 @@
       <identifier>mtype72</identifier>
       <description>Cooja Mote Type #1</description>
       <source>[CONTIKI_DIR]/examples/libs/unit-tests/code-unittests/test-examples.c</source>
-      <commands>make test-examples.cooja TARGET=cooja</commands>
+      <commands>make TARGET=cooja clean
+make -j$(CPUS) test-examples.cooja TARGET=cooja</commands>
       <moteinterface>org.contikios.cooja.interfaces.Position</moteinterface>
       <moteinterface>org.contikios.cooja.interfaces.Battery</moteinterface>
       <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiVib</moteinterface>
