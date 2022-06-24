@@ -31,6 +31,9 @@
 #include "net/routing/routing.h"
 #include "net/netstack.h"
 #include "net/ipv6/simple-udp.h"
+#include "dev/slip.h"
+#include "rpl-border-router.h"
+
 
 #include "sys/log.h"
 #define LOG_MODULE "App"
@@ -41,6 +44,8 @@
 #define UDP_SERVER_PORT	5678
 
 static struct simple_udp_connection udp_conn;
+
+void request_prefix(void);
 
 PROCESS(udp_server_process, "UDP server");
 AUTOSTART_PROCESSES(&udp_server_process);
@@ -66,14 +71,33 @@ udp_rx_callback(struct simple_udp_connection *c,
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(udp_server_process, ev, data)
 {
-  PROCESS_BEGIN();
+    static struct etimer et;
 
-  /* Initialize DAG root */
-  NETSTACK_ROUTING.root_start();
+    PROCESS_BEGIN();
+
+  prefix_set = 0;
+  NETSTACK_MAC.off();
+
+  PROCESS_PAUSE();
 
   /* Initialize UDP connection */
   simple_udp_register(&udp_conn, UDP_SERVER_PORT, NULL,
                       UDP_CLIENT_PORT, udp_rx_callback);
+
+  LOG_INFO("RPL-Border router started\n");
+
+    /* Request prefix until it has been received */
+    while(!prefix_set) {
+      etimer_set(&et, CLOCK_SECOND);
+      request_prefix();
+      PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+      LOG_INFO("Waiting for prefix\n");
+    }
+
+    NETSTACK_MAC.on();
+
+    print_local_addresses();
+
 
   PROCESS_END();
 }
