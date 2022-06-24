@@ -1542,9 +1542,6 @@ uip_process(uint8_t flag)
       goto udp_found;
     }
   }
-  if (uip_udp_no_connection()) {
-      goto drop;
-  }
   LOG_ERR("udp: no matching connection found\n");
   UIP_STAT(++uip_stat.udp.drop);
 

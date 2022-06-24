@@ -4,6 +4,10 @@ include $(CONTIKI)/Makefile.identify-target
 # embedded platforms
 MODULES += os/services/rpl-border-router/$(TARGET)
 
-ifneq ($(TARGET),native)
-	MODULES += os/services/rpl-border-router/embedded
+ifeq ($(BOARD),smartcom/cc1352R1)
+  MODULES += os/services/rpl-border-router/smartcom
+else
+  ifneq ($(TARGET),native)
+    MODULES += os/services/rpl-border-router/embedded
+  endif
 endif
