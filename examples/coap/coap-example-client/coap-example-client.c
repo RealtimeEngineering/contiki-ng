@@ -55,7 +55,7 @@
 #define LOG_LEVEL  LOG_LEVEL_APP
 
 /* FIXME: This server address is hard-coded for Cooja and link-local for unconnected border router. */
-#define SERVER_EP "coap://[fe80::212:7402:0002:0202]"
+#define SERVER_EP "coap://[fe80::212:4b00:1cbc:3df9]"
 
 #define TOGGLE_INTERVAL 10
 
@@ -93,6 +93,8 @@ PROCESS_THREAD(er_example_client, ev, data)
   static coap_endpoint_t server_ep;
   PROCESS_BEGIN();
 
+  NETSTACK_ROUTING.root_start();
+
   static coap_message_t request[1];      /* This way the packet can be treated as pointer as usual. */
 
   coap_endpoint_parse(SERVER_EP, strlen(SERVER_EP), &server_ep);
@@ -110,7 +112,7 @@ PROCESS_THREAD(er_example_client, ev, data)
     PROCESS_YIELD();
 
     if(etimer_expired(&et)) {
-      printf("--Toggle timer--\n");
+//      printf("--Toggle timer--\n");
 
       /* prepare request, TID is set by COAP_BLOCKING_REQUEST() */
       coap_init_message(request, COAP_TYPE_CON, COAP_POST, 0);
@@ -120,12 +122,12 @@ PROCESS_THREAD(er_example_client, ev, data)
 
       coap_set_payload(request, (uint8_t *)msg, sizeof(msg) - 1);
 
-      LOG_INFO_COAP_EP(&server_ep);
-      LOG_INFO_("\n");
+//      LOG_INFO_COAP_EP(&server_ep);
+//      LOG_INFO_("\n");
 
-      COAP_BLOCKING_REQUEST(&server_ep, request, client_chunk_handler);
+//      COAP_BLOCKING_REQUEST(&server_ep, request, client_chunk_handler);
 
-      printf("\n--Done--\n");
+//      printf("\n--Done--\n");
 
       etimer_reset(&et);
 
