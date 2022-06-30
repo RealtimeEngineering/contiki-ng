@@ -34,6 +34,9 @@
 /*---------------------------------------------------------------------------*/
 /* Configure the sensniff_mac_driver for netstack.h */
 #define NETSTACK_CONF_MAC      sensniff_mac_driver
+
+#define WATCHDOG_CONF_DISBALE           1
+#define IEEE802154_CONF_PANID           0xEEBE
 /*---------------------------------------------------------------------------*/
 /* Include platform-specific header */
 #include "target-conf.h"
