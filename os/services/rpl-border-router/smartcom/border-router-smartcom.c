@@ -68,7 +68,7 @@ PROCESS_THREAD(border_router_process, ev, data)
 
   LOG_INFO("RPL-Border router started\n");
 
-  NETSTACK_ROUTING.root_start();
+//  NETSTACK_ROUTING.root_start();
 
 //  /* Request prefix until it has been received */
 //  while(!prefix_set) {
