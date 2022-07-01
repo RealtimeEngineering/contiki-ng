@@ -309,4 +309,57 @@ uip_sr_link_snprint(char *buf, int buflen, const uip_sr_node_t *link)
   }
   return index;
 }
+/*---------------------------------------------------------------------------*/
+int
+uip_sr_link_snprint_reduced(char *buf, int buflen, const uip_sr_node_t *link)
+{
+  int index = 0;
+  uip_ipaddr_t child_ipaddr;
+  uip_ipaddr_t parent_ipaddr;
+
+  NETSTACK_ROUTING.get_sr_node_ipaddr(&child_ipaddr, link);
+  NETSTACK_ROUTING.get_sr_node_ipaddr(&parent_ipaddr, link->parent);
+
+  if(LOG_WITH_COMPACT_ADDR) {
+    index += log_6addr_compact_snprint(buf+index, buflen-index, &child_ipaddr);
+  } else {
+    index += uiplib_ipaddr_snprint(buf+index, buflen-index, &child_ipaddr);
+  }
+  if(index >= buflen) {
+    return index;
+  }
+
+  if(link->parent == NULL) {
+    index += snprintf(buf+index, buflen-index, ",root");
+    if(index >= buflen) {
+      return index;
+    }
+  } else {
+    index += snprintf(buf+index, buflen-index, ",");
+    if(index >= buflen) {
+      return index;
+    }
+    if(LOG_WITH_COMPACT_ADDR) {
+      index += log_6addr_compact_snprint(buf+index, buflen-index, &parent_ipaddr);
+    } else {
+      index += uiplib_ipaddr_snprint(buf+index, buflen-index, &parent_ipaddr);
+    }
+    if(index >= buflen) {
+      return index;
+    }
+  }
+  if(link->lifetime != UIP_SR_INFINITE_LIFETIME) {
+    index += snprintf(buf+index, buflen-index,
+              ",%lu", (unsigned long)link->lifetime);
+    if(index >= buflen) {
+      return index;
+    }
+  } else {
+    index += snprintf(buf+index, buflen-index, ",-");
+    if(index >= buflen) {
+      return index;
+    }
+  }
+  return index;
+}
 /** @} */

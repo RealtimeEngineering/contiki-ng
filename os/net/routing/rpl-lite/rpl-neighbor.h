@@ -194,6 +194,7 @@ rpl_nbr_t *rpl_neighbor_select_best(void);
 * byte. A value >= buflen if the buffer was too small.
 */
 int rpl_neighbor_snprint(char *buf, int buflen, rpl_nbr_t *nbr);
+int rpl_neighbor_snprint_reduced(char *buf, int buflen, rpl_nbr_t *nbr);
 
 typedef rpl_nbr_t rpl_parent_t;
 #define rpl_parent_get_from_ipaddr(addr) rpl_neighbor_get_from_ipaddr(addr)
