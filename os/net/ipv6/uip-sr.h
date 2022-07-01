@@ -193,6 +193,7 @@ void uip_sr_free_all(void);
 * byte. A value >= buflen if the buffer was too small.
 */
 int uip_sr_link_snprint(char *buf, int buflen, const uip_sr_node_t *link);
+int uip_sr_link_snprint_reduced(char *buf, int buflen, const uip_sr_node_t *link);
 
  /** @} */
 
