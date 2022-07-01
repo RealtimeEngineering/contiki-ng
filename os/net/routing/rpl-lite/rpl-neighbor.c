@@ -139,6 +139,58 @@ rpl_neighbor_snprint(char *buf, int buflen, rpl_nbr_t *nbr)
   return index;
 }
 /*---------------------------------------------------------------------------*/
+int
+rpl_neighbor_snprint_reduced(char *buf, int buflen, rpl_nbr_t *nbr)
+{
+  int index = 0;
+  rpl_nbr_t *best = best_parent(0);
+  const struct link_stats *stats = rpl_neighbor_get_link_stats(nbr);
+  clock_time_t clock_now = clock_time();
+
+  if(LOG_WITH_COMPACT_ADDR) {
+    index += log_6addr_compact_snprint(buf+index, buflen-index, rpl_neighbor_get_ipaddr(nbr));
+  } else {
+    index += uiplib_ipaddr_snprint(buf+index, buflen-index, rpl_neighbor_get_ipaddr(nbr));
+  }
+  if(index >= buflen) {
+    return index;
+  }
+  index += snprintf(buf+index, buflen-index,
+      ",%u,%u,%u,%c%c%c%c%c",
+      nbr->rank,
+      rpl_neighbor_get_link_metric(nbr),
+      stats != NULL ? stats->freshness : 0,
+      (nbr->rank == ROOT_RANK) ? 'r' : ' ',
+      nbr == best ? 'b' : ' ',
+      (acceptable_rank(rpl_neighbor_rank_via_nbr(nbr)) && rpl_neighbor_is_acceptable_parent(nbr)) ? 'a' : ' ',
+      link_stats_is_fresh(stats) ? 'f' : ' ',
+      nbr == curr_instance.dag.preferred_parent ? 'p' : ' '
+  );
+  if(index >= buflen) {
+    return index;
+  }
+  if(stats != NULL && stats->last_tx_time > 0) {
+    index += snprintf(buf+index, buflen-index,
+                              ",%u",
+                              (unsigned)((clock_now - stats->last_tx_time) / (60 * CLOCK_SECOND)));
+  } else {
+    index += snprintf(buf+index, buflen-index,
+                              ",-");
+  }
+  if(index >= buflen) {
+    return index;
+  }
+  if(nbr->better_parent_since > 0) {
+    index += snprintf(buf+index, buflen-index,
+                              ",%u",
+                              (unsigned)((clock_now - nbr->better_parent_since) / (60 * CLOCK_SECOND)));
+  } else {
+    index += snprintf(buf+index, buflen-index,
+                              ",-");
+  }
+  return index;
+}
+/*---------------------------------------------------------------------------*/
 void
 rpl_neighbor_print_list(const char *str)
 {
