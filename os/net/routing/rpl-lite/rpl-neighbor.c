@@ -156,9 +156,10 @@ rpl_neighbor_snprint_reduced(char *buf, int buflen, rpl_nbr_t *nbr)
     return index;
   }
   index += snprintf(buf+index, buflen-index,
-      ",%u,%u,%u,%c%c%c%c%c",
+      ",%u,%u,%d,%u,%c%c%c%c%c",
       nbr->rank,
       rpl_neighbor_get_link_metric(nbr),
+      stats->rssi,
       stats != NULL ? stats->freshness : 0,
       (nbr->rank == ROOT_RANK) ? 'r' : ' ',
       nbr == best ? 'b' : ' ',
