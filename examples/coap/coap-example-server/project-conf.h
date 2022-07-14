@@ -40,6 +40,15 @@
 #define PROJECT_CONF_H_
 
 #define LOG_LEVEL_APP                   LOG_LEVEL_DBG
-#define LOG_CONF_LEVEL_RPL              LOG_LEVEL_DBG
+//#define LOG_CONF_LEVEL_RPL              LOG_LEVEL_DBG
+#define LOG_CONF_LEVEL_COAP             LOG_LEVEL_DBG
+
+#define COAP_DTLS_PSK_DEFAULT_IDENTITY "SmartHomeId"
+#define COAP_DTLS_PSK_DEFAULT_KEY      "secretSmartHome"
+
+#define WATCHDOG_CONF_DISABLE           1
+#define IEEE802154_CONF_PANID           0xEEBE
+//#define LLSEC802154_CONF_ENABLED        1
+//#define CSMA_CONF_LLSEC_DEFAULT_KEY0    {0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x2F}
 
 #endif /* PROJECT_CONF_H_ */
