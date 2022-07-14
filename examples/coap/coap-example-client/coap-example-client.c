@@ -49,20 +49,15 @@
 #include "dev/button-sensor.h"
 #endif
 
-#include "dev/slip.h"
-#include "rpl-border-router.h"
-
 /* Log configuration */
 #include "coap-log.h"
 #define LOG_MODULE "App"
 #define LOG_LEVEL  LOG_LEVEL_APP
 
 /* FIXME: This server address is hard-coded for Cooja and link-local for unconnected border router. */
-#define SERVER_EP "coap://[fe80::212:7402:1ca1:907a]"
+#define SERVER_EP "coaps://[fe80::212:4b00:1ca1:907a]"
 
 #define TOGGLE_INTERVAL 10
-
-void request_prefix(void);
 
 PROCESS(er_example_client, "Erbium Example Client");
 AUTOSTART_PROCESSES(&er_example_client);
@@ -73,7 +68,7 @@ static struct etimer et;
 #define NUMBER_OF_URLS 4
 /* leading and ending slashes only for demo purposes, get cropped automatically when setting the Uri-Path */
 char *service_urls[NUMBER_OF_URLS] =
-{ ".well-known/core", "/actuators/toggle", "battery/", "error/in//path" };
+{ ".well-known/core", "/actuators/toggle", "battery/", "sensors/button" };
 #if PLATFORM_HAS_BUTTON
 static int uri_switch = 0;
 #endif
@@ -98,28 +93,12 @@ PROCESS_THREAD(er_example_client, ev, data)
   static coap_endpoint_t server_ep;
   PROCESS_BEGIN();
 
-  prefix_set = 0;
-  NETSTACK_MAC.off();
-
-  PROCESS_PAUSE();
-
-  LOG_INFO("RPL-Border router started\n");
-
-  /* Request prefix until it has been received */
-  while(!prefix_set) {
-    etimer_set(&et, CLOCK_SECOND);
-    request_prefix();
-    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    LOG_INFO("Waiting for prefix\n");
-  }
-
-  NETSTACK_MAC.on();
-
-  print_local_addresses();
+  NETSTACK_ROUTING.root_start();
 
   static coap_message_t request[1];      /* This way the packet can be treated as pointer as usual. */
 
   coap_endpoint_parse(SERVER_EP, strlen(SERVER_EP), &server_ep);
+  coap_endpoint_connect(&server_ep);
 
   etimer_set(&et, TOGGLE_INTERVAL * CLOCK_SECOND);
 
@@ -134,7 +113,7 @@ PROCESS_THREAD(er_example_client, ev, data)
     PROCESS_YIELD();
 
     if(etimer_expired(&et)) {
-      printf("--Toggle timer--\n");
+//      printf("--Toggle timer--\n");
 
       /* prepare request, TID is set by COAP_BLOCKING_REQUEST() */
       coap_init_message(request, COAP_TYPE_CON, COAP_POST, 0);
@@ -144,12 +123,12 @@ PROCESS_THREAD(er_example_client, ev, data)
 
       coap_set_payload(request, (uint8_t *)msg, sizeof(msg) - 1);
 
-      LOG_INFO_COAP_EP(&server_ep);
-      LOG_INFO_("\n");
+//      LOG_INFO_COAP_EP(&server_ep);
+//      LOG_INFO_("\n");
 
-      COAP_BLOCKING_REQUEST(&server_ep, request, client_chunk_handler);
+//      COAP_BLOCKING_REQUEST(&server_ep, request, client_chunk_handler);
 
-      printf("\n--Done--\n");
+//      printf("\n--Done--\n");
 
       etimer_reset(&et);
 
