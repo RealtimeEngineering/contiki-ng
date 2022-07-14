@@ -55,7 +55,7 @@
 #define LOG_LEVEL  LOG_LEVEL_APP
 
 /* FIXME: This server address is hard-coded for Cooja and link-local for unconnected border router. */
-#define SERVER_EP "coap://[fe80::212:4b00:1cbc:3df9]"
+#define SERVER_EP "coaps://[fe80::212:4b00:1ca1:907a]"
 
 #define TOGGLE_INTERVAL 10
 
@@ -68,7 +68,7 @@ static struct etimer et;
 #define NUMBER_OF_URLS 4
 /* leading and ending slashes only for demo purposes, get cropped automatically when setting the Uri-Path */
 char *service_urls[NUMBER_OF_URLS] =
-{ ".well-known/core", "/actuators/toggle", "battery/", "error/in//path" };
+{ ".well-known/core", "/actuators/toggle", "battery/", "sensors/button" };
 #if PLATFORM_HAS_BUTTON
 static int uri_switch = 0;
 #endif
@@ -98,6 +98,7 @@ PROCESS_THREAD(er_example_client, ev, data)
   static coap_message_t request[1];      /* This way the packet can be treated as pointer as usual. */
 
   coap_endpoint_parse(SERVER_EP, strlen(SERVER_EP), &server_ep);
+  coap_endpoint_connect(&server_ep);
 
   etimer_set(&et, TOGGLE_INTERVAL * CLOCK_SECOND);
 

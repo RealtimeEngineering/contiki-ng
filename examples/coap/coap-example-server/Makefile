@@ -5,6 +5,8 @@ TARGET = simplelink
 BOARD = launchpad/cc1352R1
 OPTIMIZATIONS = -O0
 CFLAGS += -g
+MAKE_WITH_DTLS = 1
+MAKE_COAP_DTLS_KEYSTORE = MAKE_COAP_DTLS_KEYSTORE_SIMPLE
 
 # Do not try to build on Sky because of code size limitation
 PLATFORMS_EXCLUDE = sky z1
