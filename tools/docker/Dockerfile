@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -10,17 +10,16 @@ RUN apt-get -qq update && \
     apt-get -qq -y --no-install-recommends install \
       ca-certificates \
       gnupg \
-      software-properties-common > /dev/null
+      software-properties-common > /dev/null && \
+    apt-get -qq clean
 
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF && \
-  echo "deb http://download.mono-project.com/repo/ubuntu stable-bionic main" | tee /etc/apt/sources.list.d/mono-xamarin.list && \
+  echo "deb http://download.mono-project.com/repo/ubuntu stable-focal main" | tee /etc/apt/sources.list.d/mono-official-stable.list && \
   add-apt-repository ppa:mosquitto-dev/mosquitto-ppa && \
   apt-get -qq update && \
   apt-get -qq -y --no-install-recommends install \
     ant \
     build-essential \
-    ccache \
-    doxygen \
     gdb \
     git \
     gtk-sharp2 \
@@ -29,9 +28,10 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E03280
     less \
     lib32z1 \
     libcanberra-gtk-module \
-    libcoap-1-0-bin \
+    libcoap2-bin \
     libfreetype6-dev \
     libgtk2.0-0 \
+    libncurses5 \
     libpng-dev \
     mono-complete \
     mosquitto \
@@ -99,18 +99,20 @@ RUN wget -nv https://www.nordicsemi.com/-/media/Software-and-other-downloads/Des
   rm -rf nRFCommandLineTools10121Linuxamd64.tar.gz /tmp/nrf-cli-tools
 
 # Sphinx is required for building the readthedocs API documentation.
+# RTD requirements are shared with .readthedocs.yaml for build consistency - check RTD build if modifying.
 # Matplotlib is required for result visualization.
-# After that, install nrfutil, work around broken pc_ble_driver_py dependency,
-# and remove the pip cache.
+# Nrfutil 6.1.3 does not work with protobuf 4, so install latest 3.x
+# Keep the image size down by removing the pip cache when done.
+COPY files/rtd_requirements.txt /tmp
 RUN python3 -m pip -q install --upgrade pip && \
     python3 -m pip -q install \
       setuptools \
-      sphinx_rtd_theme \
-      sphinx \
-      matplotlib && \
-    python3 -m pip -q install nrfutil && \
-    python3 -m pip -q install --no-deps -t /usr/local/lib/python3.6/dist-packages --python-version 3.6 --ignore-requires-python --upgrade nrfutil && \
-    rm -rf /root/.cache
+      matplotlib \
+      'protobuf<=4' && \
+    python3 -m pip -q install \
+      nrfutil && \
+    python3 -m pip -q install -r /tmp/rtd_requirements.txt && \
+    rm -rf /root/.cache /tmp/rtd_requirements.txt
 
 # Create user, add to groups dialout and sudo, and configure sudoers.
 RUN adduser --disabled-password --gecos '' user && \
@@ -131,6 +133,19 @@ WORKDIR                 ${HOME}
 
 # Create Cooja shortcut
 COPY --chown=user:user files/cooja ${HOME}/.local/bin/cooja
+
+# Doxygen 1.8.17 in Ubuntu 20.04 gives (false) warnings on mqtt.h.
+# Use a binary from the Doxygen homepage, static linking started with 1.9.3.
+# Remove the PDF manual and html directory to reduce image size.
+# Use the most recent version of ccache to ensure it supports the compiler
+# versions in the docker image.
+RUN wget -nv https://www.doxygen.nl/files/doxygen-1.9.4.linux.bin.tar.gz && \
+    tar zxf doxygen-1.9.4.linux.bin.tar.gz -C ${HOME}/.local && \
+    rm -rf ${HOME}/.local/doxygen-1.9.4/html ${HOME}/.local/doxygen-1.9.4/*.pdf doxygen-1.9.4.linux.bin.tar.gz && \
+    (cd ${HOME}/.local/bin && ln -s ../doxygen-1.9.4/bin/doxygen .) && \
+    wget -nv https://github.com/ccache/ccache/releases/download/v4.6.1/ccache-4.6.1-linux-x86_64.tar.xz && \
+    tar xf ccache-4.6.1-linux-x86_64.tar.xz -C ${HOME}/.local/bin --strip-components=1 ccache-4.6.1-linux-x86_64/ccache && \
+    rm ccache-4.6.1-linux-x86_64.tar.xz
 
 # Download, build and install Renode
 RUN git clone --quiet https://github.com/renode/renode.git \
