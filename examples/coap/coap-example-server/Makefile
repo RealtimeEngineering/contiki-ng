@@ -2,8 +2,8 @@ CONTIKI_PROJECT = coap-example-server
 all: $(CONTIKI_PROJECT)
 
 TARGET = simplelink
-BOARD = launchpad/cc1352R1
-OPTIMIZATIONS = -O0
+BOARD = launchpad/cc1352r1
+OPTIMAIZATION = -O0
 CFLAGS += -g
 MAKE_WITH_DTLS = 1
 MAKE_COAP_DTLS_KEYSTORE = MAKE_COAP_DTLS_KEYSTORE_SIMPLE
@@ -19,6 +19,9 @@ CONTIKI=../../..
 # Include the CoAP implementation
 include $(CONTIKI)/Makefile.dir-variables
 MODULES += $(CONTIKI_NG_APP_LAYER_DIR)/coap
-MODULES += os/services/shell
+MODULES += $(CONTIKI_NG_SERVICES_DIR)/rpl-border-router
+# Include optional target-specific module
+include $(CONTIKI)/Makefile.identify-target
+MODULES_REL += $(TARGET)
 
 include $(CONTIKI)/Makefile.include
