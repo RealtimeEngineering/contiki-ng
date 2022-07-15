@@ -2018,6 +2018,8 @@ uint16_t uip_icmp6chksum(void);
  */
 bool uip_remove_ext_hdr(void);
 
+bool uip_udp_no_connection(void);
+
 #endif /* UIP_H_ */
 
 
