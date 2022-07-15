@@ -48,9 +48,6 @@
 #include "dev/button-sensor.h"
 #endif
 
-#include "dev/slip.h"
-#include "rpl-border-router.h"
-
 /* Log configuration */
 #include "sys/log.h"
 #define LOG_MODULE "App"
@@ -91,28 +88,7 @@ AUTOSTART_PROCESSES(&er_example_server);
 
 PROCESS_THREAD(er_example_server, ev, data)
 {
-  static struct etimer et;
-
   PROCESS_BEGIN();
-
-  prefix_set = 0;
-  NETSTACK_MAC.off();
-
-  PROCESS_PAUSE();
-
-  LOG_INFO("RPL-Border router started\n");
-
-  /* Request prefix until it has been received */
-  while(!prefix_set) {
-    etimer_set(&et, CLOCK_SECOND);
-    request_prefix();
-    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    LOG_INFO("Waiting for prefix\n");
-  }
-
-  NETSTACK_MAC.on();
-
-  print_local_addresses();
 
   PROCESS_PAUSE();
 
