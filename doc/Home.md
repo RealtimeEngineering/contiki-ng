@@ -6,7 +6,7 @@ Contiki-NG is an operating system for resource-constrained devices in the Intern
 
 Online presence:
 * GitHub repository: https://github.com/contiki-ng/contiki-ng
-* Documentation: https://github.com/contiki-ng/contiki-ng/wiki
+* Documentation: https://contiki-ng.readthedocs.io/en/develop/
 * Gitter: https://gitter.im/contiki-ng
 * Contiki-NG tag on Stack Overflow: https://stackoverflow.com/questions/tagged/contiki-ng
 * Twitter: https://twitter.com/contiki_ng
@@ -101,7 +101,7 @@ Networking:
 Simulation:
 * [Cooja: getting started](/doc/tutorials/Running-Contiki-NG-in-Cooja.md)
 * [Cooja: simulating a RPL network](/doc/tutorials/Running-a-RPL-network-in-Cooja.md)
-* [Cooja: simulating a RPL network with a border router](/doc/tutorials/Cooja:-simulating-a-border-router.md)
+* [Cooja: simulating a RPL network with a border router](/doc/tutorials/Cooja-simulating-a-border-router.md)
 * [Running Contiki-NG in Renode](/doc/tutorials/Running-Contiki-NG-in-Renode.md)
 
 ## Organization, etc.
@@ -113,7 +113,7 @@ Simulation:
 * [Releases](https://github.com/contiki-ng/contiki-ng/releases)
 * [Roadmap](/doc/project/Roadmap.md)
 * [Issue and PR labels](/doc/project/Issue-and-Pull-Request-Labels.md)
-* [Where to report issues, ask questions, etc.?](/doc/project/Where-to-report-issues,-ask-questions,-etc.%3F.md)
+* [Where to report issues, ask questions, etc.?](/doc/project/Where-to-report-issues,-ask-questions,-etc.md)
 * [Logo](/doc/project/Logo.md)
 
 

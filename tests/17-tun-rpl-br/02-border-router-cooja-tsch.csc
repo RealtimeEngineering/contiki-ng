@@ -39,7 +39,6 @@ make -j$(CPUS) border-router.cooja TARGET=cooja MAKE_MAC=MAKE_MAC_TSCH DEFINES=T
       <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiEEPROM</moteinterface>
       <moteinterface>org.contikios.cooja.interfaces.Mote2MoteRelations</moteinterface>
       <moteinterface>org.contikios.cooja.interfaces.MoteAttributes</moteinterface>
-      <symbols>false</symbols>
     </motetype>
     <motetype>
       org.contikios.cooja.contikimote.ContikiMoteType
@@ -65,7 +64,6 @@ make -j$(CPUS) hello-world.cooja TARGET=cooja MAKE_MAC=MAKE_MAC_TSCH DEFINES=TSC
       <moteinterface>org.contikios.cooja.contikimote.interfaces.ContikiEEPROM</moteinterface>
       <moteinterface>org.contikios.cooja.interfaces.Mote2MoteRelations</moteinterface>
       <moteinterface>org.contikios.cooja.interfaces.MoteAttributes</moteinterface>
-      <symbols>false</symbols>
     </motetype>
     <mote>
       <interface_config>
@@ -223,6 +221,8 @@ make -j$(CPUS) hello-world.cooja TARGET=cooja MAKE_MAC=MAKE_MAC_TSCH DEFINES=TSC
     <plugin_config>
       <port>60001</port>
       <bound>true</bound>
+      <!-- Add a little extra initial time to account for TSCH association time. -->
+      <commands>[CONFIG_DIR]/test-border-router.sh [CONTIKI_DIR] 02-border-router-cooja-tsch fd00::204:4:4:4 120</commands>
     </plugin_config>
     <width>362</width>
     <z>3</z>

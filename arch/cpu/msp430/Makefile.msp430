@@ -4,9 +4,7 @@ ifdef nodeid
 CFLAGS += -DNODEID=$(nodeid)
 endif
 
-CFLAGS += -gstabs+
-
-.SUFFIXES:
+CFLAGS_DEBUG = -gstabs+
 
 ### Define the CPU directory
 CONTIKI_CPU = $(CONTIKI_NG_RELOC_CPU_DIR)/msp430
@@ -46,8 +44,11 @@ CONTIKI_SOURCEFILES        += $(CONTIKI_TARGET_SOURCEFILES)
 
 ### Compiler definitions
 
+# LTO is available in GCC 4.7.2, but crashes for MSP430.
+NO_LTO_TARGET = 1
+
 ifeq ($(WERROR),1)
-CFLAGSWERROR= -Wall -Werror
+  CFLAGSWERROR = -Werror
 endif
 
 CC       = msp430-gcc
@@ -58,6 +59,7 @@ AR       = msp430-ar
 NM       = msp430-nm
 OBJCOPY  = msp430-objcopy
 STRIP    = msp430-strip
+SIZE     = msp430-size
 BSL      = msp430-bsl
 
 ifdef CPU_HAS_MSP430X
@@ -78,6 +80,7 @@ CFLAGSNO = -Wall -mmcu=$(MCU) $(CFLAGSWERROR)
 endif
 CFLAGS  += -Os -fno-strict-aliasing -std=gnu99
 LDFLAGS += -mmcu=$(MCU) -Wl,-Map=$(CONTIKI_NG_PROJECT_MAP)
+LDFLAGS += -Wl,--sort-section=alignment
 
 ### These flags can reduce the code size and RAM usage with up to 10%
 SMALL ?= 1
@@ -109,24 +112,20 @@ CLEAN += *.firmware *.ihex
 %.firmware:	%.${TARGET}
 	mv $< $@
 
-%.ihex: %.$(TARGET)
+%.ihex: $(BUILD_DIR_BOARD)/%.$(TARGET)
 	$(OBJCOPY) $^ -O ihex $@
 
-$(COOJA_PATH)/build.xml:
+$(COOJA_PATH)/java:
 	@echo '----------------'
-	@echo 'Could not find the COOJA build file. Did you run "git submodule update --init --recursive"?'
+	@echo 'Could not find COOJA. Did you run "git submodule update --init --recursive"?'
 	@echo '----------------'
+	@false
 
-$(COOJA_PATH)/mspsim/build.xml: $(COOJA_PATH)/build.xml
-	@echo '----------------'
-	@echo 'Could not find the MSPSim build file. Did you run "git submodule update --init --recursive"?'
-	@echo '----------------'
+$(COOJA_PATH)/dist/cooja.jar: | $(COOJA_PATH)/java
+	ant -e -logger org.apache.tools.ant.listener.SimpleBigProjectLogger -f $(COOJA_PATH)/build.xml jar
 
-$(COOJA_PATH)/mspsim/mspsim.jar: $(COOJA_PATH)/mspsim/build.xml
-	cd $(COOJA_PATH)/mspsim && ant jar
+%.mspsim: $(BUILD_DIR_BOARD)/%.${TARGET} | $(COOJA_PATH)/java
+	$(Q)ant -e -logger org.apache.tools.ant.listener.SimpleBigProjectLogger -f $(COOJA_PATH)/build.xml run-mspsim -Dargs="-platform=${TARGET}" -DFIRMWAREFILE=$(realpath $<)
 
-%.mspsim:	%.${TARGET} ${COOJA_PATH}/mspsim/mspsim.jar
-	$(JAVA) -jar ${COOJA_PATH}/mspsim/mspsim.jar -platform=${TARGET} $<
-
-%.mspsim-maptable: %.$(TARGET)
-	$(JAVA) -classpath ${COOJA_PATH}/mspsim/mspsim.jar se.sics.mspsim.util.MapTable $(CONTIKI_NG_PROJECT_MAP)
+%.mspsim-maptable: $(BUILD_DIR_BOARD)/%.$(TARGET) ${COOJA_PATH}/dist/cooja.jar
+	$(Q)$(JAVA) -classpath ${COOJA_PATH}/dist/cooja.jar se.sics.mspsim.util.MapTable $(CONTIKI_NG_PROJECT_MAP)
