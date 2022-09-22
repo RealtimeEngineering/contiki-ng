@@ -17,9 +17,24 @@
 #define LOG_LEVEL LOG_LEVEL_NONE
 /*---------------------------------------------------------------------------*/
 void set_prefix_64(uip_ipaddr_t *);
+int32_t get_version_sw(void);
 
 static uip_ipaddr_t last_sender;
 
+/*---------------------------------------------------------------------------*/
+static uint8_t
+get_checksum(const uint8_t *pData, uint8_t size)
+{
+  uint32_t checksum = 0;
+
+  while (size) {
+    checksum += *pData;
+    pData++;
+    size--;
+  }
+
+  return (checksum % 0x100);
+}
 /*---------------------------------------------------------------------------*/
 void
 request_prefix(void)
@@ -35,10 +50,42 @@ request_prefix(void)
 static void
 ip_input_callback(void)
 {
-  LOG_DBG("SIN: %u\n", uip_len);
-  /* Save the last sender received over SLIP to avoid bouncing the
-     packet back if no route is found */
-  uip_ipaddr_copy(&last_sender, &UIP_IP_BUF->srcipaddr);
+    if(uip_buf[0] == '!') {
+      LOG_INFO("Got configuration message of type %c\n",
+               uip_buf[1]);
+      if(uip_buf[1] == 'P') {
+        uip_ipaddr_t prefix;
+        /* Here we set a prefix !!! */
+        memset(&prefix, 0, 16);
+        memcpy(&prefix, &uip_buf[2], 8);
+        LOG_INFO("Setting prefix ");
+        LOG_INFO_6ADDR(&prefix);
+        LOG_INFO_("\n");
+        set_prefix_64(&prefix);
+      }
+      uipbuf_clear();
+    } else if(uip_buf[0] == '?') {
+      LOG_INFO("Got request message of type %c\n", uip_buf[1]);
+      if(uip_buf[1] == 'V') {
+        uint32_t version = get_version_sw();
+        /* this is just a test so far... just to see if it works */
+        uip_buf[0] = '?';
+        uip_buf[1] = 'V';
+        uip_buf[2] = version & 0x000000FF;
+        uip_buf[3] = (version >> 8) & 0x000000FF;
+        uip_buf[4] = (version >> 16) & 0x000000FF;
+        uip_buf[5] = (version >> 24) & 0x000000FF;
+        uip_buf[6] = get_checksum(uip_buf, 6);
+        uip_len = 7;
+        ip_uart_send();
+      }
+      uipbuf_clear();
+    } else {
+      /* Save the last sender received over SLIP to avoid bouncing the
+         packet back if no route is found */
+      uip_ipaddr_copy(&last_sender, &UIP_IP_BUF->srcipaddr);
+    }
+
 }
 /*---------------------------------------------------------------------------*/
 static void

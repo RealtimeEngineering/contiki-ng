@@ -87,12 +87,12 @@
 #endif
 
 #if CCFG_CONF_ROM_BOOTLOADER_ENABLE
-#define SET_CCFG_BL_CONFIG_BOOTLOADER_ENABLE         0xC5
+#define SET_CCFG_BL_CONFIG_BOOTLOADER_ENABLE          0xC5
 #define SET_CCFG_BL_CONFIG_BL_LEVEL                  0x00
 #if defined(CCFG_CONF_BL_PIN_NUMBER)
-#define SET_CCFG_BL_CONFIG_BL_PIN_NUMBER            CCFG_CONF_BL_PIN_NUMBER
+#define SET_CCFG_BL_CONFIG_BL_PIN_NUMBER              CCFG_CONF_BL_PIN_NUMBER
 #endif
-#define SET_CCFG_BL_CONFIG_BL_ENABLE                 0xC5
+#define SET_CCFG_BL_CONFIG_BL_ENABLE                  0xC5
 #endif /* CCFG_CONF_ROM_BOOTLOADER_ENABLE */
 /** @} */
 /*---------------------------------------------------------------------------*/
