@@ -52,7 +52,9 @@ ccm_star_packetbuf_set_nonce(uint8_t *nonce, int forward)
 {
   const linkaddr_t *source_addr;
 
-  source_addr = forward ? &linkaddr_node_addr : packetbuf_addr(PACKETBUF_ADDR_SENDER);
+  source_addr = forward
+      ? &linkaddr_node_addr
+      : packetbuf_addr(PACKETBUF_ADDR_SENDER);
   memcpy(nonce, source_addr->u8, LINKADDR_SIZE);
   memset(nonce + LINKADDR_SIZE, 0, 8 - LINKADDR_SIZE);
   nonce[8] = packetbuf_attr(PACKETBUF_ATTR_FRAME_COUNTER_BYTES_2_3) >> 8;
