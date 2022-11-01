@@ -17,6 +17,7 @@
 #define LOG_LEVEL LOG_LEVEL_NONE
 /*---------------------------------------------------------------------------*/
 void set_prefix_64(uip_ipaddr_t *);
+void get_ipv6(uip_ipaddr_t *);
 int32_t get_version_sw(void);
 
 static uip_ipaddr_t last_sender;
@@ -68,7 +69,7 @@ ip_input_callback(void)
       LOG_INFO("Got request message of type %c\n", uip_buf[1]);
       if(uip_buf[1] == 'V') {
         uint32_t version = get_version_sw();
-        /* this is just a test so far... just to see if it works */
+        /* here we return the version of the node */
         uip_buf[0] = '?';
         uip_buf[1] = 'V';
         uip_buf[2] = version & 0x000000FF;
@@ -77,6 +78,17 @@ ip_input_callback(void)
         uip_buf[5] = (version >> 24) & 0x000000FF;
         uip_buf[6] = get_checksum(uip_buf, 6);
         uip_len = 7;
+        ip_uart_send();
+      }
+      else if(uip_buf[1] == 'I') {
+        uip_ipaddr_t ip;
+        get_ipv6(&ip);
+        /* here we return the IPv6 of the node */
+        uip_buf[0] = '?';
+        uip_buf[1] = 'I';
+        memcpy(&uip_buf[2], &ip.u8[0], 16);
+        uip_buf[18] = get_checksum(uip_buf, 18);
+        uip_len = 19;
         ip_uart_send();
       }
       uipbuf_clear();
