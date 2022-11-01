@@ -190,7 +190,10 @@
 #define NETSTACK_CONF_RADIO         prop_mode_driver
 
 /* CSMA configuration. */
+#ifndef CSMA_CONF_ACK_WAIT_TIME
 #define CSMA_CONF_ACK_WAIT_TIME                (RTIMER_SECOND / 300)
+#endif /* CSMA_CONF_ACK_WAIT_TIME */
+
 #define CSMA_CONF_AFTER_ACK_DETECTED_WAIT_TIME (RTIMER_SECOND / 1000)
 #define CSMA_CONF_SEND_SOFT_ACK      1
 
