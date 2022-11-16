@@ -492,21 +492,15 @@ const uint_least8_t TRNG_count = CC1312R1_SMARTSENSOR_TRNGCOUNT;
  */
 GPIO_PinConfig gpioPinConfigs[] = {
     /* Input pins */
-    GPIOCC26XX_DIO_13 | GPIO_DO_NOT_CONFIG,  /* Button 0 */
-    GPIOCC26XX_DIO_14 | GPIO_DO_NOT_CONFIG,  /* Button 1 */
-
-    GPIOCC26XX_DIO_15 | GPIO_DO_NOT_CONFIG,  /* CC1312R1_SMARTSENSOR_SPI_MASTER_READY */
-    GPIOCC26XX_DIO_21 | GPIO_DO_NOT_CONFIG,  /* CC1312R1_SMARTSENSOR_SPI_SLAVE_READY */
 
     /* Output pins */
-    GPIOCC26XX_DIO_07 | GPIO_DO_NOT_CONFIG,  /* Green LED */
-    GPIOCC26XX_DIO_06 | GPIO_DO_NOT_CONFIG,  /* Red LED */
+    GPIOCC26XX_DIO_10 | GPIO_DO_NOT_CONFIG,  /* STM NRST */
+    GPIOCC26XX_DIO_11 | GPIO_DO_NOT_CONFIG,   /* STM boot */
 
     /* SPI Flash CSN */
-    GPIOCC26XX_DIO_20 | GPIO_DO_NOT_CONFIG,
-
-    /* SD CS */
-    GPIOCC26XX_DIO_21 | GPIO_DO_NOT_CONFIG,
+    GPIOCC26XX_DIO_03 | GPIO_DO_NOT_CONFIG,   /* SPI flash WP */
+    GPIOCC26XX_DIO_04 | GPIO_DO_NOT_CONFIG,   /* SPI flash hold */
+    GPIOCC26XX_DIO_06 | GPIO_DO_NOT_CONFIG,   /* SPI flash CS */
 };
 
 /*
@@ -517,10 +511,7 @@ GPIO_PinConfig gpioPinConfigs[] = {
  *       reduce memory usage (if placed at end of gpioPinConfigs array).
  */
 GPIO_CallbackFxn gpioCallbackFunctions[] = {
-    NULL,  /* Button 0 */
-    NULL,  /* Button 1 */
-    NULL,  /* CC1312R1_SMARTSENSOR_SPI_MASTER_READY */
-    NULL,  /* CC1312R1_SMARTSENSOR_SPI_SLAVE_READY */
+    NULL,  /* Dummy */
 };
 
 const GPIOCC26XX_Config GPIOCC26XX_config = {
@@ -751,16 +742,18 @@ const uint_least8_t NVS_count = CC1312R1_SMARTSENSOR_NVSCOUNT;
 
 const PIN_Config BoardGpioInitTable[] = {
 
-    CC1312R1_SMARTSENSOR_PIN_RLED | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MAX,       /* LED initially off          */
-    CC1312R1_SMARTSENSOR_PIN_GLED | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MAX,       /* LED initially off          */
-    CC1312R1_SMARTSENSOR_PIN_BTN1 | PIN_INPUT_EN | PIN_PULLUP | PIN_IRQ_BOTHEDGES | PIN_HYSTERESIS,          /* Button is active low       */
-    CC1312R1_SMARTSENSOR_PIN_BTN2 | PIN_INPUT_EN | PIN_PULLUP | PIN_IRQ_BOTHEDGES | PIN_HYSTERESIS,          /* Button is active low       */
-    CC1312R1_SMARTSENSOR_SPI_FLASH_CS | PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL | PIN_DRVSTR_MIN,  /* External flash chip select */
-    CC1312R1_SMARTSENSOR_UART_RX | PIN_INPUT_EN | PIN_PULLDOWN,                                              /* UART RX via debugger back channel */
-    CC1312R1_SMARTSENSOR_UART_TX | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL,                         /* UART TX via debugger back channel */
-    CC1312R1_SMARTSENSOR_SPI0_MOSI | PIN_INPUT_EN | PIN_PULLDOWN,                                            /* SPI master out - slave in */
-    CC1312R1_SMARTSENSOR_SPI0_MISO | PIN_INPUT_EN | PIN_PULLDOWN,                                            /* SPI master in - slave out */
-    CC1312R1_SMARTSENSOR_SPI0_CLK | PIN_INPUT_EN | PIN_PULLDOWN,                                             /* SPI clock */
+    CC1312R1_SMARTSENSOR_STM_NRST | PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL | PIN_DRVSTR_MIN,  /* STM NRST */
+    CC1312R1_SMARTSENSOR_STM_BOOT | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MIN,  /* STM boot */
+    CC1312R1_SMARTSENSOR_UART1_RX | PIN_INPUT_EN | PIN_PULLUP,                                                 /* UART RX via debugger back channel */
+    CC1312R1_SMARTSENSOR_UART1_TX | PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL,
+    CC1312R1_SMARTSENSOR_SPI_FLASH_WP | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MIN,    /* External flash write protection */
+    CC1312R1_SMARTSENSOR_SPI_FLASH_HOLD | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MIN,  /* External flash hold */
+    CC1312R1_SMARTSENSOR_SPI_FLASH_CS | PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL | PIN_DRVSTR_MIN,   /* External flash chip select */
+    CC1312R1_SMARTSENSOR_UART_RX | PIN_INPUT_EN | PIN_PULLUP,                                                 /* UART RX via debugger back channel */
+    CC1312R1_SMARTSENSOR_UART_TX | PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL,                         /* UART TX via debugger back channel */
+    CC1312R1_SMARTSENSOR_SPI0_MOSI | PIN_INPUT_EN | PIN_PULLDOWN,                                             /* SPI master out - slave in */
+    CC1312R1_SMARTSENSOR_SPI0_MISO | PIN_INPUT_EN | PIN_PULLDOWN,                                             /* SPI master in - slave out */
+    CC1312R1_SMARTSENSOR_SPI0_CLK | PIN_INPUT_EN | PIN_PULLDOWN,                                              /* SPI clock */
 
     PIN_TERMINATE
 };
