@@ -50,6 +50,8 @@
 
 int coap_block1_handler(coap_message_t *request, coap_message_t *response,
                         uint8_t *target, size_t *len, size_t max_len);
+int coap_block1_handler_blockwise(coap_message_t *request, coap_message_t *response,
+                        uint8_t *target, size_t *len, size_t max_len);
 
 #endif /* COAP_BLOCK1_H_ */
 /** @} */

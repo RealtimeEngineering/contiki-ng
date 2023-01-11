@@ -122,5 +122,75 @@ coap_block1_handler(coap_message_t *request, coap_message_t *response,
 
   return 0;
 }
+
+/**
+ * \brief Block 1 support within a CoAP resource.
+ *
+ *        This function will help you to use block 1. If the target
+ *        parameter is \p NULL, then error handling and response
+ *        configuration is active.
+ *
+ *        You can find an example in
+ *        examples/coap/coap-example-server/resources/res-b1-sep-b2.c
+ *
+ * \param request Request pointer from the handler.
+ *
+ * \param response Response pointer from the handler.
+ *
+ * \param target Pointer to the buffer where the request payload can
+ * be assembled.
+ *
+ * \param len Pointer to the variable where the function stores the
+ * actual length.
+ *
+ * \param max_len Length of the \p target buffer.
+ *
+ * \return 0 if the initialisation was successful,
+ *         1 if more blocks will follow, or
+ *         -1 if the initialisation failed.
+ */
+int
+coap_block1_handler_blockwise(coap_message_t *request, coap_message_t *response,
+                    uint8_t *target, size_t *len, size_t max_len)
+{
+  const uint8_t *payload = 0;
+  int pay_len = coap_get_payload(request, &payload);
+
+  if(!pay_len || !payload) {
+    coap_status_code = BAD_REQUEST_4_00;
+    coap_error_message = "NoPayload";
+    return -1;
+  }
+
+  if(pay_len > max_len) {
+    coap_status_code = REQUEST_ENTITY_TOO_LARGE_4_13;
+    coap_error_message = "Message to big";
+    return -1;
+  }
+
+  if(target && len) {
+    memcpy(target, payload, pay_len);
+    *len = request->block1_offset + pay_len;
+  }
+
+  if(coap_is_option(request, COAP_OPTION_BLOCK1)) {
+    LOG_DBG("Blockwise: block 1 request: Num: %"PRIu32
+            ", More: %u, Size: %u, Offset: %"PRIu32"\n",
+            request->block1_num,
+            request->block1_more,
+            request->block1_size,
+            request->block1_offset);
+
+    coap_set_header_block1(response, request->block1_num,
+         request->block1_more, request->block1_size);
+    if(request->block1_more) {
+      coap_set_status_code(response, CONTINUE_2_31);
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
 /*---------------------------------------------------------------------------*/
 /** @} */
