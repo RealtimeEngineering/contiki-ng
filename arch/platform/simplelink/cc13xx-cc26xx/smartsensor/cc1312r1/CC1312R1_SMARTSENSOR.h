@@ -60,7 +60,7 @@ extern "C" {
 extern const PIN_Config BoardGpioInitTable[];
 
 /* Defines */
-#define CC1312R1_LAUNCHXL
+#define CC1312R1_SMARTSENSOR
 
 /* Mapping of pins to board signals using general board aliases
  *      <board signal alias>                  <pin mapping>   <comments>

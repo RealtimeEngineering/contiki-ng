@@ -40,7 +40,7 @@ extern "C" {
 #include <ti/drivers/Board.h>
 #include "CC1312R1_SMARTSENSOR.h"
 
-#define Board_CC1312R1_LAUNCHXL
+#define Board_CC1312R1_SMARTSENSOR
 #define BOARD_STRING            "TI CC1312R1 SmartSensor"
 
 #define Board_initGeneral()      Board_init()  /* deprecated */
@@ -154,6 +154,31 @@ extern "C" {
 #define Board_UART1             CC1312R1_SMARTSENSOR_UART1
 
 #define Board_WATCHDOG0         CC1312R1_SMARTSENSOR_WATCHDOG0
+
+/*---------------------------------------------------------------------------*/
+/**
+ * \name The external flash SPI CS pin, defined in Board.h.
+ *
+ * Note that SPI SCK, MOSI and MISO does not need to be defined, as they are
+ * implicitly defined via the Board_SPI0 controller.
+ *
+ * Those values are not meant to be modified by the user
+ * @{
+ */
+#if TI_SPI_CONF_SPI0_ENABLE
+#define EXT_FLASH_SPI_CONTROLLER      Board_SPI0
+
+#define EXT_FLASH_SPI_PIN_SCK         Board_SPI0_SCK
+#define EXT_FLASH_SPI_PIN_MOSI        Board_SPI0_MOSI
+#define EXT_FLASH_SPI_PIN_MISO        Board_SPI0_MISO
+#define EXT_FLASH_SPI_PIN_CS          Board_SPI_FLASH_CS
+
+#define EXT_FLASH_DEVICE_ID           0x16
+#define EXT_FLASH_MID                 0x37
+
+#define EXT_FLASH_PROGRAM_PAGE_SIZE   256
+#define EXT_FLASH_ERASE_SECTOR_SIZE   4096
+#endif /* TI_SPI_CONF_SPI0_ENABLE */
 
 #ifdef __cplusplus
 }

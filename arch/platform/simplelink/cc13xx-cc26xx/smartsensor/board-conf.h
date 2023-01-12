@@ -66,6 +66,9 @@
 #define TI_UART_CONF_UART0_ENABLE       1
 #define TI_UART_CONF_UART1_ENABLE       1
 
+#define TI_SPI_CONF_ENABLE              1
+#define TI_SPI_CONF_SPI0_ENABLE         1
+
 #define PLATFORM_HAS_LEDS           0
 
 #define LEDS_CONF_COUNT             0
@@ -97,30 +100,30 @@
  */
 #define BOARD_CONF_HAS_SENSORS      0
 /** @} */
-/*---------------------------------------------------------------------------*/
-/**
- * \name The external flash SPI CS pin, defined in Board.h.
- *
- * Note that SPI SCK, MOSI and MISO does not need to be defined, as they are
- * implicitly defined via the Board_SPI0 controller.
- *
- * Those values are not meant to be modified by the user
- * @{
- */
-#if TI_SPI_CONF_SPI0_ENABLE
-#define EXT_FLASH_SPI_CONTROLLER      Board_SPI0
-
-#define EXT_FLASH_SPI_PIN_SCK         Board_SPI0_SCK
-#define EXT_FLASH_SPI_PIN_MOSI        Board_SPI0_MOSI
-#define EXT_FLASH_SPI_PIN_MISO        Board_SPI0_MISO
-#define EXT_FLASH_SPI_PIN_CS          Board_SPI_FLASH_CS
-
-#define EXT_FLASH_DEVICE_ID           0x14
-#define EXT_FLASH_MID                 0xC2
-
-#define EXT_FLASH_PROGRAM_PAGE_SIZE   256
-#define EXT_FLASH_ERASE_SECTOR_SIZE   4096
-#endif /* TI_SPI_CONF_SPI0_ENABLE */
+///*---------------------------------------------------------------------------*/
+///**
+// * \name The external flash SPI CS pin, defined in Board.h.
+// *
+// * Note that SPI SCK, MOSI and MISO does not need to be defined, as they are
+// * implicitly defined via the Board_SPI0 controller.
+// *
+// * Those values are not meant to be modified by the user
+// * @{
+// */
+//#if TI_SPI_CONF_SPI0_ENABLE
+//#define EXT_FLASH_SPI_CONTROLLER      Board_SPI0
+//
+//#define EXT_FLASH_SPI_PIN_SCK         Board_SPI0_SCK
+//#define EXT_FLASH_SPI_PIN_MOSI        Board_SPI0_MOSI
+//#define EXT_FLASH_SPI_PIN_MISO        Board_SPI0_MISO
+//#define EXT_FLASH_SPI_PIN_CS          Board_SPI_FLASH_CS
+//
+//#define EXT_FLASH_DEVICE_ID           0x16
+//#define EXT_FLASH_MID                 0x37
+//
+//#define EXT_FLASH_PROGRAM_PAGE_SIZE   256
+//#define EXT_FLASH_ERASE_SECTOR_SIZE   4096
+//#endif /* TI_SPI_CONF_SPI0_ENABLE */
 /** @} */
 /*---------------------------------------------------------------------------*/
 #endif /* BOARD_CONF_H_ */

@@ -54,8 +54,8 @@
 #define EXT_FLASH_SPI_PIN_MISO        GPIO_HAL_PIN_UNKNOWN
 #define EXT_FLASH_SPI_PIN_CS          GPIO_HAL_PIN_UNKNOWN
 
-#define EXT_FLASH_DEVICE_ID           0xFF
-#define EXT_FLASH_MID                 0xFF
+#define EXT_FLASH_DEVICE_ID           0x16
+#define EXT_FLASH_MID                 0x37
 
 #define EXT_FLASH_PROGRAM_PAGE_SIZE   256
 #define EXT_FLASH_ERASE_SECTOR_SIZE   4096
