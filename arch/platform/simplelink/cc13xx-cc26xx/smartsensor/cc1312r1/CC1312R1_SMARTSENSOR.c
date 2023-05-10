@@ -744,13 +744,9 @@ const PIN_Config BoardGpioInitTable[] = {
 
     CC1312R1_SMARTSENSOR_STM_NRST | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_OPENDRAIN | PIN_DRVSTR_MIN | PIN_PULLUP,  /* STM NRST */
     CC1312R1_SMARTSENSOR_STM_BOOT | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MIN,  /* STM boot */
-    CC1312R1_SMARTSENSOR_UART1_RX | PIN_INPUT_EN | PIN_PULLUP,                                                 /* UART RX via debugger back channel */
-    CC1312R1_SMARTSENSOR_UART1_TX | PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL,
     CC1312R1_SMARTSENSOR_SPI_FLASH_WP | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MIN,    /* External flash write protection */
     CC1312R1_SMARTSENSOR_SPI_FLASH_HOLD | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL | PIN_DRVSTR_MIN,  /* External flash hold */
     CC1312R1_SMARTSENSOR_SPI_FLASH_CS | PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL | PIN_DRVSTR_MIN,   /* External flash chip select */
-    CC1312R1_SMARTSENSOR_UART_RX | PIN_INPUT_EN | PIN_PULLUP,                                                 /* UART RX via debugger back channel */
-    CC1312R1_SMARTSENSOR_UART_TX | PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL,                         /* UART TX via debugger back channel */
     CC1312R1_SMARTSENSOR_SPI0_MOSI | PIN_INPUT_EN | PIN_PULLDOWN,                                             /* SPI master out - slave in */
     CC1312R1_SMARTSENSOR_SPI0_MISO | PIN_INPUT_EN | PIN_PULLDOWN,                                             /* SPI master in - slave out */
     CC1312R1_SMARTSENSOR_SPI0_CLK | PIN_INPUT_EN | PIN_PULLDOWN,                                              /* SPI clock */

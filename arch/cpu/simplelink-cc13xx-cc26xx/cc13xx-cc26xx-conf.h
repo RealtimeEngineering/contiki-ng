@@ -393,7 +393,7 @@
  * \brief  Enable or disable I2C driver.
  */
 #ifndef TI_I2C_CONF_ENABLE
-#define TI_I2C_CONF_ENABLE                  1
+#define TI_I2C_CONF_ENABLE                  0
 #endif
 
 /**
