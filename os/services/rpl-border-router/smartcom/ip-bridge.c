@@ -19,6 +19,7 @@
 void set_prefix_64(uip_ipaddr_t *);
 void get_ipv6(uip_ipaddr_t *);
 int32_t get_version_sw(void);
+void set_panid(uint16_t panid);
 
 static uip_ipaddr_t last_sender;
 
@@ -63,6 +64,17 @@ ip_input_callback(void)
         LOG_INFO_6ADDR(&prefix);
         LOG_INFO_("\n");
         set_prefix_64(&prefix);
+      }
+      else if(uip_buf[1] == 'I') {
+        uint16_t panid;
+        /* Here we set the PANID !!! */
+        memcpy(&panid, &uip_buf[2], sizeof(panid));
+        uint8_t checksum = get_checksum(uip_buf, 2+sizeof(panid));
+        if (checksum == uip_buf[2+sizeof(panid)]) {
+          LOG_INFO("Setting PANID %d ", panid);
+          LOG_INFO_("\n");
+          set_panid(panid);
+        }
       }
       uipbuf_clear();
     } else if(uip_buf[0] == '?') {
