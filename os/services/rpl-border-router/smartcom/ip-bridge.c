@@ -74,6 +74,11 @@ ip_input_callback(void)
           LOG_INFO("Setting PANID %d ", panid);
           LOG_INFO_("\n");
           set_panid(panid);
+          uip_buf[0] = '!';
+          uip_buf[1] = 'I';
+          uip_buf[2] = get_checksum(uip_buf, 2);
+          uip_len = 3;
+          ip_uart_send();
         }
       }
       uipbuf_clear();

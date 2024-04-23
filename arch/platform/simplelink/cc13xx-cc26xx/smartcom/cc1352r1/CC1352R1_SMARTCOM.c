@@ -739,10 +739,10 @@ const uint_least8_t NVS_count = CC1352R1_SMARTCOM_NVSCOUNT;
 #include <ti/drivers/pin/PINCC26XX.h>
 
 const PIN_Config BoardGpioInitTable[] = {
-    CC1352R1_SMARTCOM_UART0_RX | PIN_INPUT_EN | PIN_PULLDOWN,                                                /* UART RX via debugger back channel */
-    CC1352R1_SMARTCOM_UART0_TX | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL,                           /* UART TX via debugger back channel */
-    CC1352R1_SMARTCOM_UART1_RX | PIN_INPUT_EN | PIN_PULLDOWN,                                                /* UART RX via debugger back channel */
-    CC1352R1_SMARTCOM_UART1_TX | PIN_GPIO_OUTPUT_EN | PIN_GPIO_LOW | PIN_PUSHPULL,                           /* UART TX via debugger back channel */
+    CC1352R1_SMARTCOM_UART0_RX | PIN_INPUT_EN | PIN_PULLUP,                                                /* UART RX via debugger back channel */
+    CC1352R1_SMARTCOM_UART0_TX | PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL,                        /* UART TX via debugger back channel */
+    CC1352R1_SMARTCOM_UART1_RX | PIN_INPUT_EN | PIN_PULLUP,                                                /* UART RX via debugger back channel */
+    CC1352R1_SMARTCOM_UART1_TX | PIN_GPIO_OUTPUT_EN | PIN_GPIO_HIGH | PIN_PUSHPULL,                        /* UART TX via debugger back channel */
     PIN_TERMINATE
 };
 
