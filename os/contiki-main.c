@@ -171,6 +171,8 @@ main(void)
 
   watchdog_start();
 
+  LOG_INFO("Enter main endless loop\n");
+
 #if PLATFORM_PROVIDES_MAIN_LOOP
   platform_main_loop();
 #else
