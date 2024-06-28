@@ -62,6 +62,9 @@
  * @{
  */
 
+#define TI_I2C_CONF_ENABLE              1
+#define TI_I2C_CONF_I2C0_ENABLE         1
+
 #define TI_UART_CONF_ENABLE             1
 #define TI_UART_CONF_UART0_ENABLE       1
 #define TI_UART_CONF_UART1_ENABLE       1
