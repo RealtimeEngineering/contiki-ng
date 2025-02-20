@@ -127,7 +127,7 @@ bool ip_uart_init( void )
   ClockP_FreqHz freq;
   ClockP_getCpuFreq(&freq);
 //    rx_load_val = 48000000 / TI_UART_CONF_BAUD_RATE * 11 * 3;
-  rx_load_val = 480000;
+  rx_load_val = 480000 / 4;
   GPTimerCC26XX_setLoadValue(timer_handle, rx_load_val);
   GPTimerCC26XX_registerInterrupt(timer_handle, ip_uart_timer_cb, GPT_INT_TIMEOUT);
 //    GPTimerCC26XX_start(timer_handle);
