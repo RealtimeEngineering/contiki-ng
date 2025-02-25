@@ -12,138 +12,102 @@
 
 #include <Board.h>
 #include <ti/drivers/UART.h>
-#include <ti/drivers/timer/GPTimerCC26XX.h>
 
 
 /*---------------------------------------------------------------------------*/
 /* Log configuration */
 #include "sys/log.h"
 #define LOG_MODULE "IPUART"
-#define LOG_LEVEL LOG_LEVEL_NONE
+#define LOG_LEVEL LOG_LEVEL_ERR
 /*---------------------------------------------------------------------------*/
 
-#define POLL_INTERVAL   5       /**< */
-#define BUFFER_SIZE     256     /**< */
+#define BUFFER_SIZE       256       /**< TX and RX buffer size in bytes*/
+#define MODBUS_CRC_POLY   0xA001    /**< Modbus CRC polynomial ( note: 0x8005 bit reversed )*/
 
 extern uint16_t uip_len;
 
-typedef enum {
-    eDrvUartStateIdle = 0,
-    eDrvUartStateReceive,
-    eDrvUartStateReceiveComplete
-} EDrvUartState_t;
-
-
-static bool initialized;
+static volatile bool initialized;
 static UART_Handle uart_handle;
-//static struct etimer et;
-static GPTimerCC26XX_Handle timer_handle;
 
-static EDrvUartState_t rx_state;
-static uint32_t rx_cnt = 0;
-static uint8_t rx_char_buf;
-static uint8_t rx_buf[BUFFER_SIZE];
-static uint8_t tx_buf[BUFFER_SIZE];
-static GPTimerCC26XX_Value rx_load_val;
+static volatile int32_t rx_cnt = 0;
+static uint8_t rx_buf[BUFFER_SIZE + sizeof(uint16_t)];
+static uint8_t tx_buf[BUFFER_SIZE + sizeof(uint16_t)];
 
 PROCESS(ip_uart_process, "IP UART interface");
 process_event_t uart_rx_event;
-//process_event_t uart_tx_event;
-//AUTOSTART_PROCESSES(&ip_uart_process);
 
 /*---------------------------------------------------------------------------*/
-static void ip_uart_cb(UART_Handle handle, void *buf, size_t count) {
-  bool new_data = false;
+void ip_uart_crc_modbus_init( volatile uint16_t * ptrToCrc )
+{
 
-  // Timeout handling
-  switch (rx_state) {
-  case eDrvUartStateIdle:
-    GPTimerCC26XX_setLoadValue(timer_handle, rx_load_val);
-    GPTimerCC26XX_start(timer_handle);
-    rx_cnt = 0;
-    rx_state = eDrvUartStateReceive;
-    new_data = true;
-    break;
-  case eDrvUartStateReceive:
-    GPTimerCC26XX_setLoadValue(timer_handle, rx_load_val);
-    new_data = true;
-    break;
-  case eDrvUartStateReceiveComplete:
-    break;
-  }
+  *ptrToCrc = 0xFFFF;
+}
 
-  // Get received data byte
-  if (true == new_data) {
-    if (sizeof(rx_buf) > rx_cnt) {
-      rx_buf[rx_cnt] = rx_char_buf;
-      rx_cnt++;
+void ip_uart_crc_modbus_update( volatile uint16_t * ptrToCrc, uint8_t value )
+{
+  uint8_t     i;
+  uint16_t    tempCrc;
+
+  tempCrc = *ptrToCrc;
+  /* Calc CRC */
+  for (i=0, tempCrc ^= (uint16_t)value ; i < 8; i++) {
+    if (tempCrc & 0x0001) {
+      tempCrc = (tempCrc >> 1) ^ MODBUS_CRC_POLY;
     }
-    // Start next read
-    UART_read(uart_handle, &rx_char_buf, 1);
+    else {
+      tempCrc >>= 1;
+    }
+  }
+  *ptrToCrc = tempCrc;
+}
+
+void ip_uart_crc_modbus_calc( volatile uint16_t * ptrToCrc, uint8_t * ptrToValue,  uint16_t numBytes )
+{
+
+  ip_uart_crc_modbus_init( ptrToCrc );
+
+  while( numBytes-- ) {
+    ip_uart_crc_modbus_update( ptrToCrc, *ptrToValue++ );
   }
 }
 
-static void ip_uart_timer_cb(GPTimerCC26XX_Handle handle, GPTimerCC26XX_IntMask interruptMask)
+static void (*input_callback)(void) = NULL;
+void ip_uart_set_input_callback(void (*c)(void))
 {
-  // Stop timer
-  GPTimerCC26XX_stop(timer_handle);
-
-  rx_state = eDrvUartStateReceiveComplete;
-  // Cancel reading until received data got proceeded
-  UART_readCancel(uart_handle);
-  // Send event to proceed received data
-  process_post(PROCESS_BROADCAST, uart_rx_event, NULL);
+  input_callback = c;
 }
 
-void ip_uart_process_data( void )
+static void ip_uart_cb(UART_Handle handle, void *buf, size_t count)
 {
-  uint32_t len = uip_len;
-  memcpy(tx_buf, uip_buf, len);
-  uipbuf_clear();
-  UART_write(uart_handle, tx_buf, len);
+    rx_cnt = count;
+    // Send event to proceed received data
+    process_post(PROCESS_BROADCAST, uart_rx_event, NULL);
 }
 
 bool ip_uart_init( void )
 {
-  GPTimerCC26XX_Params timer_params;
   UART_Params uart_params;
 
   if(initialized) {
     return initialized;
   }
 
-  rx_state = eDrvUartStateIdle;
-  rx_cnt = 0;
-
-  GPTimerCC26XX_Params_init(&timer_params);
-  timer_params.width          = GPT_CONFIG_32BIT;
-  timer_params.mode           = GPT_MODE_ONESHOT;
-  timer_params.direction      = GPTimerCC26XX_DIRECTION_DOWN;
-  timer_params.debugStallMode = GPTimerCC26XX_DEBUG_STALL_ON;
-  timer_handle = GPTimerCC26XX_open(CC1352R1_SMARTCOM_GPTIMER0A, &timer_params);
-  if(NULL == timer_handle) {
-    return initialized;
-  }
-  ClockP_FreqHz freq;
-  ClockP_getCpuFreq(&freq);
-//    rx_load_val = 48000000 / TI_UART_CONF_BAUD_RATE * 11 * 3;
-  rx_load_val = 480000 / 4;
-  GPTimerCC26XX_setLoadValue(timer_handle, rx_load_val);
-  GPTimerCC26XX_registerInterrupt(timer_handle, ip_uart_timer_cb, GPT_INT_TIMEOUT);
-//    GPTimerCC26XX_start(timer_handle);
-
+  // Initialize uart
   UART_Params_init(&uart_params);
   uart_params.baudRate = TI_UART_CONF_BAUD_RATE;
   uart_params.readMode = UART_MODE_CALLBACK;
   uart_params.writeMode = UART_MODE_BLOCKING;
-  uart_params.readTimeout = 1000;
-//    uart_params.writeTimeout ;
+// uart_params.readTimeout = 1000;
+// uart_params.writeTimeout ;
   uart_params.readCallback = ip_uart_cb;
   uart_params.readDataMode = UART_DATA_BINARY;
   uart_handle = UART_open(Board_UART1, &uart_params);
   if (NULL == uart_handle) {
     return initialized;
   }
+
+  // Configure partial read
+  UART_control(uart_handle, UART_CMD_RESERVED + 0, NULL);
 
   initialized = true;
 
@@ -168,14 +132,20 @@ int_fast32_t ip_uart_write(const void *buf, size_t buf_size)
 
 void ip_uart_send(void)
 {
-  uint32_t len = uip_len;
-  memcpy(tx_buf, uip_buf, len);
-  UART_write(uart_handle, tx_buf, len);
-}
-
-static void (*input_callback)(void) = NULL;
-void ip_uart_set_input_callback(void (*c)(void)) {
-  input_callback = c;
+  if ((sizeof(tx_buf) - sizeof(uint16_t)) >= uip_len) {
+    // Copy data to transmit
+    uint32_t len = uip_len;
+    memcpy(tx_buf, uip_buf, len);
+    // Add CRC
+    ip_uart_crc_modbus_calc((uint16_t *)&tx_buf[len], tx_buf, len);
+    int32_t ret = UART_write(uart_handle, tx_buf, len + sizeof(uint16_t));
+    if (0 == ret) {
+      LOG_ERR("ip-uart: send failed: %d\n", (int)ret);
+    }
+  }
+  else {
+    LOG_ERR("ip-uart: send uip_buf too large\n");
+  }
 }
 
 void ip_uart_start(void)
@@ -190,22 +160,41 @@ PROCESS_THREAD(ip_uart_process, ev, data)
   uart_rx_event = process_alloc_event();
 
   // Start reading
-  UART_read(uart_handle, &rx_char_buf, 1);
+  rx_cnt = 0;
+  memset(rx_buf, 0, sizeof(rx_buf));
+  UART_read(uart_handle, rx_buf, sizeof(rx_buf));
 
   while (true) {
     PROCESS_WAIT_EVENT();
     // RX event
     if(ev == uart_rx_event) {
       // Send received data from host CPU to 6loWPAN stack
-      uip_len = rx_cnt;
-      memmove(&uip_buf[0], rx_buf, uip_len);
-      if(input_callback) {
-        input_callback();
+      if ((0 < rx_cnt) && (sizeof(uip_buf) >= rx_cnt)) {
+        uint16_t crc;
+        // Check CRC
+        ip_uart_crc_modbus_calc(&crc, rx_buf, rx_cnt);
+        if (0 == crc) {
+          uip_len = rx_cnt;
+          memmove(&uip_buf[0], rx_buf, uip_len);
+          if(input_callback) {
+            input_callback();
+          }
+          tcpip_input();
+        }
+        else {
+          LOG_ERR("ip-uart: receive rx_buf crc void len=%ld ", rx_cnt);
+          LOG_INFO_("dest=");
+          LOG_INFO_6ADDR(&((struct uip_ip_hdr *)rx_buf)->destipaddr);
+          LOG_ERR_("\n");
+        }
       }
-      tcpip_input();
+      else {
+        LOG_ERR("ip-uart: receive rx_buf too large\n");
+      }
       // Start reading
-      rx_state = eDrvUartStateIdle;
-      UART_read(uart_handle, &rx_char_buf, 1);
+      rx_cnt = 0;
+      memset(rx_buf, 0, sizeof(rx_buf));
+      UART_read(uart_handle, rx_buf, sizeof(rx_buf));
     }
   }
 

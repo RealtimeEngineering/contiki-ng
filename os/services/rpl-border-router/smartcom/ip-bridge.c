@@ -14,7 +14,7 @@
 /* Log configuration */
 #include "sys/log.h"
 #define LOG_MODULE "SLIP"
-#define LOG_LEVEL LOG_LEVEL_NONE
+#define LOG_LEVEL LOG_LEVEL_ERR
 /*---------------------------------------------------------------------------*/
 void set_prefix_64(uip_ipaddr_t *);
 void get_ipv6(uip_ipaddr_t *);
@@ -23,20 +23,6 @@ void set_panid(uint16_t panid);
 
 static uip_ipaddr_t last_sender;
 
-/*---------------------------------------------------------------------------*/
-static uint8_t
-get_checksum(const uint8_t *pData, uint8_t size)
-{
-  uint32_t checksum = 0;
-
-  while (size) {
-    checksum += *pData;
-    pData++;
-    size--;
-  }
-
-  return (checksum % 0x100);
-}
 /*---------------------------------------------------------------------------*/
 void
 request_prefix(void)
@@ -53,8 +39,7 @@ static void
 ip_input_callback(void)
 {
     if(uip_buf[0] == '!') {
-      LOG_INFO("Got configuration message of type %c\n",
-               uip_buf[1]);
+      LOG_INFO("Got configuration message of type %c\n", uip_buf[1]);
       if(uip_buf[1] == 'P') {
         uip_ipaddr_t prefix;
         /* Here we set a prefix !!! */
@@ -68,18 +53,15 @@ ip_input_callback(void)
       else if(uip_buf[1] == 'I') {
         uint16_t panid;
         /* Here we set the PANID !!! */
+        memset(&panid, 0, sizeof(panid));
         memcpy(&panid, &uip_buf[2], sizeof(panid));
-        uint8_t checksum = get_checksum(uip_buf, 2+sizeof(panid));
-        if (checksum == uip_buf[2+sizeof(panid)]) {
-          LOG_INFO("Setting PANID %d ", panid);
-          LOG_INFO_("\n");
-          set_panid(panid);
-          uip_buf[0] = '!';
-          uip_buf[1] = 'I';
-          uip_buf[2] = get_checksum(uip_buf, 2);
-          uip_len = 3;
-          ip_uart_send();
-        }
+        LOG_INFO("Setting PANID %d ", panid);
+        LOG_INFO_("\n");
+        set_panid(panid);
+        uip_buf[0] = '!';
+        uip_buf[1] = 'I';
+        uip_len = 2;
+        ip_uart_send();
       }
       uipbuf_clear();
     } else if(uip_buf[0] == '?') {
@@ -93,8 +75,7 @@ ip_input_callback(void)
         uip_buf[3] = (version >> 8) & 0x000000FF;
         uip_buf[4] = (version >> 16) & 0x000000FF;
         uip_buf[5] = (version >> 24) & 0x000000FF;
-        uip_buf[6] = get_checksum(uip_buf, 6);
-        uip_len = 7;
+        uip_len = 6;
         ip_uart_send();
       }
       else if(uip_buf[1] == 'I') {
@@ -104,8 +85,7 @@ ip_input_callback(void)
         uip_buf[0] = '?';
         uip_buf[1] = 'I';
         memcpy(&uip_buf[2], &ip.u8[0], 16);
-        uip_buf[18] = get_checksum(uip_buf, 18);
-        uip_len = 19;
+        uip_len = 18;
         ip_uart_send();
       }
       uipbuf_clear();
@@ -113,6 +93,9 @@ ip_input_callback(void)
       /* Save the last sender received over SLIP to avoid bouncing the
          packet back if no route is found */
       uip_ipaddr_copy(&last_sender, &UIP_IP_BUF->srcipaddr);
+      LOG_INFO("slip-bridge: dest=");
+      LOG_INFO_6ADDR(&UIP_IP_BUF->destipaddr);
+      LOG_INFO_("\n");
     }
 
 }
